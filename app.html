@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康狀況管理App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .input-field {
+            margin: 10px 0;
+        }
+        input[type="number"], input[type="date"], input[type="text"] {
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .record-list {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .record-item {
+            background-color: #f0f0f0;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .record-item span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>健康狀況管理App</h1>
+</header>
+
+<div class="container">
+    <!-- 體重紀錄區 -->
+    <div class="section">
+        <h2>體重紀錄</h2>
+        <div class="input-field">
+            <label for="weight">體重 (kg):</label>
+            <input type="number" id="weight" placeholder="輸入體重" step="0.1">
+        </div>
+        <div class="input-field">
+            <label for="date">日期:</label>
+            <input type="date" id="weightDate">
+        </div>
+        <button onclick="addWeightRecord()">添加體重紀錄</button>
+    </div>
+
+    <!-- 步數紀錄區 -->
+    <div class="section">
+        <h2>步數紀錄</h2>
+        <div class="input-field">
+            <label for="steps">步數:</label>
+            <input type="number" id="steps" placeholder="輸入步數">
+        </div>
+        <div class="input-field">
+            <label for="stepsDate">日期:</label>
+            <input type="date" id="stepsDate">
+        </div>
+        <button onclick="addStepsRecord()">添加步數紀錄</button>
+    </div>
+
+    <!-- 飲食紀錄區 -->
+    <div class="section">
+        <h2>飲食紀錄</h2>
+        <div class="input-field">
+            <label for="meal">餐點內容:</label>
+            <input type="text" id="meal" placeholder="輸入餐點內容">
+        </div>
+        <div class="input-field">
+            <label for="mealDate">日期:</label>
+            <input type="date" id="mealDate">
+        </div>
+        <button onclick="addMealRecord()">添加飲食紀錄</button>
+    </div>
+
+    <!-- 紀錄展示區 -->
+    <div class="section">
+        <h2>我的健康紀錄</h2>
+        <ul class="record-list" id="recordList">
+            <!-- 紀錄會動態添加到這裡 -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    const records = [];
+
+    // 添加體重紀錄
+    function addWeightRecord() {
+        const weight = document.getElementById('weight').value;
+        const date = document.getElementById('weightDate').value;
+
+        if (weight && date) {
+            const record = { type: '體重', value: `${weight} kg`, date: date };
+            records.push(record);
+            renderRecords();
+            clearInputFields();
+        } else {
+            alert("請填寫所有欄位！");
+        }
+    }
+
+    // 添加步數紀錄
+    function addStepsRecord() {
+        const steps = document.getElementById('steps').value;
+        const date = document.getElementById('stepsDate').value;
+
+        if (steps && date) {
+            const record = { type: '步數', value: `${steps} 步`, date: date };
+            records.push(record);
+            renderRecords();
+            clearInputFields();
+        } else {
+            alert("請填寫所有欄位！");
+        }
+    }
+
+    // 添加飲食紀錄
+    function addMealRecord() {
+        const meal = document.getElementById('meal').value;
+        const date = document.getElementById('mealDate').value;
+
+        if (meal && date) {
+            const record = { type: '飲食', value: meal, date: date };
+            records.push(record);
+            renderRecords();
+            clearInputFields();
+        } else {
+            alert("請填寫所有欄位！");
+        }
+    }
+
+    // 渲染所有紀錄
+    function renderRecords() {
+        const recordList = document.getElementById('recordList');
+        recordList.innerHTML = ''; // 清空目前的紀錄列表
+
+        records.forEach((record) => {
+            const li = document.createElement('li');
+            li.classList.add('record-item');
+            li.innerHTML = `<span>${record.type}</span> - ${record.value} <span>日期: ${record.date}</span>`;
+            recordList.appendChild(li);
+        });
+    }
+
+    // 清空輸入欄位
+    function clearInputFields() {
+        document.getElementById('weight').value = '';
+        document.getElementById('steps').value = '';
+        document.getElementById('meal').value = '';
+        document.getElementById('weightDate').value = '';
+        document.getElementById('stepsDate').value = '';
+        document.getElementById('mealDate').value = '';
+    }
+</script>
+
+</body>
+</html>
