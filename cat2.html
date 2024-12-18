@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳躍的犀利貓咪</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f8ff;
+        }
+
+        canvas {
+            display: block;
+            background-color: #d0e7ff;
+            margin: 0 auto;
+            border: 2px solid #333;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: #333;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            color: red;
+            font-family: Arial, sans-serif;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+<div id="score">分數: 0</div>
+<div id="gameOver">遊戲結束!</div>
+
+<script>
+// 取得畫布及其上下文
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// 設定畫布大小
+canvas.width = 800;
+canvas.height = 400;
+
+// 遊戲狀態變數
+let isJumping = false;
+let jumpHeight = 0;
+let gravity = 0.8;
+let jumpSpeed = 15;
+let score = 0;
+let gameOver = false;
+
+// 犀利貓咪物件
+const cat = {
+    x: 50,
+    y: canvas.height - 50,
+    width: 50,
+    height: 50,
+    color: '#ffcc00',  // 貓咪顏色
+    speed: 5,
+    draw: function() {
+        // 畫貓咪的身體（簡單的矩形）
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // 畫貓咪的眼睛
+        ctx.beginPath();
+        ctx.arc(this.x + 15, this.y + 15, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(this.x + 35, this.y + 15, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // 畫貓咪的瞳孔
+        ctx.beginPath();
+        ctx.arc(this.x + 15, this.y + 15, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(this.x + 35, this.y + 15, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+
+        // 畫貓咪的嘴巴（鋒利的笑容）
+        ctx.beginPath();
+        ctx.moveTo(this.x + 20, this.y + 30);
+        ctx.lineTo(this.x + 25, this.y + 35);
+        ctx.lineTo(this.x + 30, this.y + 30);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+};
+
+// 球物件
+const ball = {
+    x: canvas.width,
+    y: Math.random() * (canvas.height - 50) + 50,
+    radius: 20,
+    color: '#ff6347',
+    speed: 5
+};
+
+// 障礙物物件
+const obstacle = {
+    x: canvas.width,
+    y: canvas.height - 30,
+    width: 30,
+    height: 30,
+    color: '#000',
+    speed: 6
+};
+
+// 遊戲邏輯
+function update() {
+    if (gameOver) return;
+
+    // 清除畫布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 更新貓咪跳躍
+    if (isJumping) {
+        jumpHeight += jumpSpeed;
+        if (jumpHeight >= 100) {
+            jumpSpeed = -15;
+        }
+    } else {
+        if (cat.y < canvas.height - 50) {
+            jumpHeight += gravity;
+        } else {
+            jumpHeight = 0;
+        }
+    }
+
+    // 檢查貓咪是否在跳躍
+    if (jumpHeight > 0 && !isJumping) {
+        isJumping = true;
+    } else if (jumpHeight <= 0) {
+        isJumping = false;
+    }
+
+    // 更新貓咪的y位置
+    cat.y = canvas.height - 50 - jumpHeight;
+
+    // 更新球的位置
+    ball.x -= ball.speed;
+    if (ball.x < -ball.radius) {
+        ball.x = canvas.width;
+        ball.y = Math.random() * (canvas.height - 50) + 50;
+        score++;
+        document.getElementById('score').innerText = `分數: ${score}`;
+    }
+
+    // 檢查貓咪是否碰到球
+    if (Math.abs(cat.x - ball.x) < cat.width && Math.abs(cat.y - ball.y) < cat.height) {
+        ball.x = canvas.width;
+        ball.y = Math.random() * (canvas.height - 50) + 50;
+        score += 5;  // 撿到球加分
+        document.getElementById('score').innerText = `分數: ${score}`;
+    }
+
+    // 更新障礙物位置
+    obstacle.x -= obstacle.speed;
+    if (obstacle.x < -obstacle.width) {
+        obstacle.x = canvas.width;
+    }
+
+    // 檢查貓咪是否碰到障礙物
+    if (cat.x < obstacle.x + obstacle.width && cat.x + cat.width > obstacle.x && cat.y < obstacle.y + obstacle.height && cat.y + cat.height > obstacle.y) {
+        gameOver = true;
+        document.getElementById('gameOver').style.display = 'block';
+    }
+
+    // 畫貓咪
+    cat.draw();
+
+    // 畫球
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color;
+    ctx.fill();
+
+    // 畫障礙物
+    ctx.fillStyle = obstacle.color;
+    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+    // 重複呼叫update
+    requestAnimationFrame(update);
+}
+
+// 處理鍵盤事件
+document.addEventListener('keydown', function (e) {
+    if (e.key === ' ' && !isJumping && !gameOver) {  // 空白鍵觸發跳躍
+        jumpSpeed = 15;
+    }
+});
+
+// 開始遊戲
+update();
+</script>
+
+</body>
+</html>
